@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: ollama-llama
+          uri: http://ollama:11434
+          predicates:
+            - Path=/api/llama/**
+        - id: ollama-tinyllama
+          uri: http://ollama:11434
+          predicates:
+            - Path=/api/tinyllama/**
