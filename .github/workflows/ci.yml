@@ -25,12 +25,11 @@ jobs:
 
     - name: Lint Python files
       run: |
-        flake8 mlflow/ tests/ --max-line-length=120 --ignore=E501,W503,E302,E303,W291,W293
+        flake8 mlflow/ tests/ --ignore=E302,E303,E305,E128,E501,W503
 
     - name: Validate Kubernetes manifests
       run: |
         for f in k8s/*.yaml; do
-          echo "Validating $f..."
           python -c "import yaml; yaml.safe_load(open('$f'))" && echo "✅ $f valid"
         done
 
