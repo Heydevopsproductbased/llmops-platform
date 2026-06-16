@@ -21,7 +21,7 @@ jobs:
         python-version: '3.11'
 
     - name: Install dependencies
-      run: pip install mlflow requests flake8
+      run: pip install mlflow requests flake8 pyyaml
 
     - name: Lint Python files
       run: |
@@ -30,7 +30,12 @@ jobs:
     - name: Validate Kubernetes manifests
       run: |
         for f in k8s/*.yaml; do
-          python -c "import yaml; yaml.safe_load(open('$f'))" && echo "✅ $f valid"
+          python -c "
+import yaml
+with open('$f') as fh:
+    docs = list(yaml.safe_load_all(fh))
+    print('✅ Valid:', '$f', '(' + str(len(docs)) + ' docs)')
+"
         done
 
     - name: Check all required files exist
