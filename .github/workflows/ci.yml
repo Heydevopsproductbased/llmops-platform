@@ -1,0 +1,51 @@
+name: LLMOps Platform CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    name: Lint & Validate
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: pip install mlflow requests
+
+    - name: Lint Python files
+      run: |
+        pip install flake8
+        flake8 mlflow/ tests/ --max-line-length=100 --ignore=E501
+
+    - name: Validate Kubernetes manifests
+      run: |
+        for f in k8s/*.yaml; do
+          echo "Validating $f..."
+          python -c "import yaml; yaml.safe_load(open('$f'))" && echo "✅ $f is valid"
+        done
+
+    - name: Validate Docker Compose
+      run: |
+        pip install docker-compose
+        docker compose config
+
+    - name: Check all required files exist
+      run: |
+        echo "Checking project structure..."
+        test -f docker-compose.yml         && echo "✅ docker-compose.yml"
+        test -f observability/prometheus.yml && echo "✅ prometheus.yml"
+        test -f gateway/pom.xml             && echo "✅ gateway/pom.xml"
+        test -f mlflow/mlflow-tracking.py   && echo "✅ mlflow-tracking.py"
+        test -f tests/ab-test.py            && echo "✅ ab-test.py"
+        echo "All checks passed!"
