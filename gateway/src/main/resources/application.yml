@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: llmops-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: ollama-generate
+          uri: http://ollama:11434
+          predicates:
+            - Path=/api/generate
+          filters:
+            - AddRequestHeader=X-Gateway-Source, llmops-platform
+
+        - id: ollama-tags
+          uri: http://ollama:11434
+          predicates:
+            - Path=/api/tags
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
